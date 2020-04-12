@@ -360,3 +360,6 @@ terraform.txt
 **/wwwroot/css/site.min.css
 **/wwwroot/js/site.min.js
 **/wwwroot/lib/*
+env.txt
+launch.json
+tasks.json
