@@ -250,7 +250,7 @@ az storage account create -g $RG -n $STORAGE_ACCOUNT
 az storage share create --name $SHARE_NAME --account-name $STORAGE_ACCOUNT
 
 # get the key
-STORAGE_KEY=$(az storage account keys list -g $RG -n $STORAGE_ACCOUNT --query "[0].value")
+STORAGE_KEY=$(az storage account keys list -g $RG -n $STORAGE_ACCOUNT --query "[0].value" | tr -d '"')
 
 # create a secret
 kubectl create secret generic fruit-secret \
