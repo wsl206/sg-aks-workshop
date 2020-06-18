@@ -49,11 +49,15 @@ export TF_VAR_azure_aag_public_ip=$(az network public-ip show -g $RG -n $AGPUBLI
 export TF_VAR_azure_vnet_name=$VNET_NAME 
 export TF_VAR_github_organization=Azure # PLEASE NOTE: This should be your github username if you forked the repository.
 export TF_VAR_github_token=<use previously created PAT token>
-export TF_VAR_aad_server_app_id=<ask_instructor>
-export TF_VAR_aad_server_app_secret=<ask_instructor>
-export TF_VAR_aad_client_app_id=<ask_instructor>
-export TF_VAR_aad_tenant_id=<ask_instructor>
+export TF_VAR_aad_server_app_id=456edfc9-4799-46df-a604-b44b6975cd05
+export TF_VAR_aad_server_app_secret=eiVJ4qdcdnpRl_w?6sTF4xPqWT:J=uc4
+export TF_VAR_aad_client_app_id=1e3480da-6c85-4ee8-a0bc-0cc98071a598
+export TF_VAR_aad_tenant_id=7346653d-f1c6-4b27-b56e-155e464c444a
 ```
+
+
+GUID for server & client app ids creation:
+https://docs.microsoft.com/en-us/azure/aks/azure-ad-integration-cli
 
 Now that we have all of our variables stored we can initialize Terraform.
 
