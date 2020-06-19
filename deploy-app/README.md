@@ -73,6 +73,8 @@ One of the most important things an organization can do when adopting Containers
 helm version
 # Install Anchore
 kubectl create namespace anchore
+helm repo add stable https://kubernetes-charts.storage.googleapis.com
+helm repo update
 helm install anchore stable/anchore-engine --namespace anchore
 # Check Status
 helm status anchore --namespace anchore
