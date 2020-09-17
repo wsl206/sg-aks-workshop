@@ -21,3 +21,8 @@ output "cluster_ca_certificate" {
 output "host" {
   value = azurerm_kubernetes_cluster.demo.kube_admin_config.0.host
 }
+
+
+output "kubectl" {
+  value = "az aks get-credentials -g ${var.resource_group} -n ${azurerm_kubernetes_cluster.demo.name}"
+}
