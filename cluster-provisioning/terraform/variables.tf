@@ -60,7 +60,7 @@ variable "admin_username" {
   description = "The username assigned to the admin user on the OS of the AKS nodes if SSH access is ever needed"
 }
 variable "agent_count" {
-  default     = "3"
+  default     = "1"
   description = "The starting number of Nodes in the AKS cluster"
 }
 
