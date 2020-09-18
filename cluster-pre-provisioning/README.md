@@ -105,7 +105,7 @@ az extension add --name azure-firewall
 # Create Public IP for Azure Firewall
 az network public-ip create -g $RG -n $FWPUBLICIP_NAME -l $LOC --sku "Standard"
 # Create Azure Firewall
-az network firewall create -g $RG -n $FWNAME -l $LOC
+az network firewall create -g $RG -n $FWNAME -l $LOC --enable-dns-proxy true
 # Configure Azure Firewall IP Config - This command will take several mins so be patient.
 az network firewall ip-config create -g $RG -f $FWNAME -n $FWIPCONFIG_NAME --public-ip-address $FWPUBLICIP_NAME --vnet-name $VNET_NAME
 # Capture Azure Firewall IP Address for Later Use
