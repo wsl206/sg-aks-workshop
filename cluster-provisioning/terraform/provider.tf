@@ -1,5 +1,5 @@
 provider "azurerm" {
-  version = "=2.2.0"
+  version = "=2.28.0"
   features {}
 }
 
@@ -15,7 +15,7 @@ provider "kubernetes" {
   client_key             = base64decode(azurerm_kubernetes_cluster.demo.kube_admin_config.0.client_key)
   cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.demo.kube_admin_config.0.cluster_ca_certificate)
   #version                = "=0.6.0"
-  version = "=1.11.1"
+  version = "=1.13.2"
 }
 
 provider "tls" {

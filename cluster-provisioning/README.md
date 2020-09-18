@@ -9,7 +9,7 @@ You may ask "Why not utilize Azure Resource Manager Templates?"... The reason we
 Pull Requests enabled on the config repo are independent of the cluster itself and can be reviewed by developers. This leaves a complete audit trail of every tag update and config change, regardless of whether it was made manually or automatically. Although using git as part of your CI/CD pipeline adds another layer of defense, it also means that the security onus is shifted to git itself.
 
 Weaveworks Flux was one of the first tools to enable the GitOps approach and it’s the
- tool we will use due to its maturity and level of adoption. Below is a diagram that describes how the approach works.
+tool we will use due to its maturity and level of adoption. Below is a diagram that describes how the approach works.
 
 ![GitOps Diagram](./img/gitops.png "GitOps Diagram")
 
@@ -39,25 +39,32 @@ We will also need to set up all our variables from the last lab, so we can utili
 export TF_VAR_prefix=$PREFIX
 export TF_VAR_resource_group=$RG
 export TF_VAR_location=$LOC
-export TF_VAR_client_id=$APPID
-export TF_VAR_client_secret=$PASSWORD
+
 export TF_VAR_azure_subnet_id=$(az network vnet subnet show -g $RG --vnet-name $VNET_NAME --name $AKSSUBNET_NAME --query id -o tsv)
 export TF_VAR_azure_aag_subnet_id=$(az network vnet subnet show -g $RG --vnet-name $VNET_NAME --name $APPGWSUBNET_NAME --query id -o tsv)
 export TF_VAR_azure_subnet_name=$APPGWSUBNET_NAME
 export TF_VAR_azure_aag_name=$AGNAME
 export TF_VAR_azure_aag_public_ip=$(az network public-ip show -g $RG -n $AGPUBLICIP_NAME --query id -o tsv)
-export TF_VAR_azure_vnet_name=$VNET_NAME 
+export TF_VAR_azure_vnet_name=$VNET_NAME
 export TF_VAR_github_organization=Azure # PLEASE NOTE: This should be your github username if you forked the repository.
 export TF_VAR_github_token=<use previously created PAT token>
+```
+
+<del>
+
+```
+export TF_VAR_client_id=$APPID
+export TF_VAR_client_secret=$PASSWORD
 export TF_VAR_aad_server_app_id=<ask_instructor>
 export TF_VAR_aad_server_app_secret=<ask_instructor>
 export TF_VAR_aad_client_app_id=<ask_instructor>
 export TF_VAR_aad_tenant_id=<ask_instructor>
 ```
 
-
 GUID for server & client app ids creation:
 https://docs.microsoft.com/en-us/azure/aks/azure-ad-integration-cli
+
+</del>
 
 Now that we have all of our variables stored we can initialize Terraform.
 
@@ -111,7 +118,7 @@ Now that we have verified what will be deployed, we can execute the `terraform a
 terraform apply
 ```
 
-***This will take approximately 10-15 minutes to fully provision all of our resources***
+**_This will take approximately 10-15 minutes to fully provision all of our resources_**
 
 In the next section, we will talk about our approach to automating the setup, that is typically done in a post-install setup. We utilize Flux, which will automatically sync our Kubernetes manifest from a Github repo.
 
@@ -134,27 +141,25 @@ tooling.
 
 You'll notice once your cluster is provisioned you'll also have the following deployed:
 
-* __Namespaces__ - Allows logical isolation of resources and provides the ability to set RBAC, Quota, Network Policies between namespaces.
-  
-* __RBAC Policies__ - The RBAC policies are set to give pre-defined active directory groups restricted permissions to the deployed cluster. This allows different permissions to specific namespaces.
+- **Namespaces** - Allows logical isolation of resources and provides the ability to set RBAC, Quota, Network Policies between namespaces.
+- **RBAC Policies** - The RBAC policies are set to give pre-defined active directory groups restricted permissions to the deployed cluster. This allows different permissions to specific namespaces.
 
-* __Network Policy Rules__ - The network policies will restrict communication between different teams' namespace, to limit the exposure of access between namespaces.
+- **Network Policy Rules** - The network policies will restrict communication between different teams' namespace, to limit the exposure of access between namespaces.
 
-* __Gatekeeper Policies__ - Allows a custom admission control to define policies to meet the company's compliance and governance needs. For example, if you want to only allow users to deploy internal load balancers, then Gatekeeper can enforce it based on the policy that has been set.
+- **Gatekeeper Policies** - Allows a custom admission control to define policies to meet the company's compliance and governance needs. For example, if you want to only allow users to deploy internal load balancers, then Gatekeeper can enforce it based on the policy that has been set.
 
-* __Falco Rules__ - Provides runtime security to enforce policy across all your Kubernetes clusters. For example, one of the policies will inform you based on users performing an "exec" command against a container.
+- **Falco Rules** - Provides runtime security to enforce policy across all your Kubernetes clusters. For example, one of the policies will inform you based on users performing an "exec" command against a container.
 
-* __Linkerd Service Mesh__ - A service mesh provides a lot of features that are out of scope of this workshop, but we will focus on the security features present in a service mesh. Linkerd will provide mTLS HTTP-based communication between meshed pods, by establishing and authenticating secure, private TLS connections between Linkerd proxies.
-  
-* __Quotas__ - Quotas will allow you to set resource consumption governance on a namespace to limit the amount of resources a team or user can deploy to a cluster. It gives you a way to logically carve out resources of a single cluster.
+- **Linkerd Service Mesh** - A service mesh provides a lot of features that are out of scope of this workshop, but we will focus on the security features present in a service mesh. Linkerd will provide mTLS HTTP-based communication between meshed pods, by establishing and authenticating secure, private TLS connections between Linkerd proxies.
+- **Quotas** - Quotas will allow you to set resource consumption governance on a namespace to limit the amount of resources a team or user can deploy to a cluster. It gives you a way to logically carve out resources of a single cluster.
 
-* __Ingress__ - Ingress will provide L7 networking features for North-to-South traffic coming into the cluster. This provides SSL offloading for services exposed to end-users.
+- **Ingress** - Ingress will provide L7 networking features for North-to-South traffic coming into the cluster. This provides SSL offloading for services exposed to end-users.
 
-* __Kured__ - Kured will assist with rebooting the nodes when needed as part of the shared responsibility between customer and Microsoft for the worker nodes. It will cordon and drain the worker nodes one by one, in an orderly fashion.
+- **Kured** - Kured will assist with rebooting the nodes when needed as part of the shared responsibility between customer and Microsoft for the worker nodes. It will cordon and drain the worker nodes one by one, in an orderly fashion.
 
-* __AAD Pod Identity__ - This namespace contains the controllers and daemonSets needed to use Managed Pod Identity to access other Azure resources like Azure Key Vault (AKV) without having to manage/deploy secrets and keys.
+- **AAD Pod Identity** - This namespace contains the controllers and daemonSets needed to use Managed Pod Identity to access other Azure resources like Azure Key Vault (AKV) without having to manage/deploy secrets and keys.
 
-This is all done through Flux by automatically making sure that your new container images and configs are propagated to the cluster. How did we do this through the Terraform deployment? You'll find two different Terraform files, one (```github.tf```) that created an access key for our git repo and the other (```flux.tf```), which uses the Kubernetes provider to deploy flux to the cluster. Flux then has access to the repo and points to the cluster-config directory, which hosts all of our Kubernetes manifests. Flux automatically propagates and applies all the configs to the AKS cluster.
+This is all done through Flux by automatically making sure that your new container images and configs are propagated to the cluster. How did we do this through the Terraform deployment? You'll find two different Terraform files, one (`github.tf`) that created an access key for our git repo and the other (`flux.tf`), which uses the Kubernetes provider to deploy flux to the cluster. Flux then has access to the repo and points to the cluster-config directory, which hosts all of our Kubernetes manifests. Flux automatically propagates and applies all the configs to the AKS cluster.
 
 The below diagram shows our production cluster
 
@@ -166,5 +171,5 @@ The below diagram shows our production cluster
 
 ## Key Links
 
-* Flux Docs - <https://docs.fluxcd.io/en/stable/>
-* Terraform AKS Docs - <https://www.terraform.io/docs/providers/azurerm/r/kubernetes_cluster.html>
+- Flux Docs - <https://docs.fluxcd.io/en/stable/>
+- Terraform AKS Docs - <https://www.terraform.io/docs/providers/azurerm/r/kubernetes_cluster.html>

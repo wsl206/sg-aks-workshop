@@ -130,7 +130,7 @@ resource "kubernetes_deployment" "flux" {
 
         container {
           name  = "flux"
-          image = "docker.io/fluxcd/flux:1.18.0"
+          image = "docker.io/fluxcd/flux-prerelease:master-1f0f862b"
 
           volume_mount {
             name       = "git-key"
@@ -148,8 +148,9 @@ resource "kubernetes_deployment" "flux" {
             "--ssh-keygen-dir=/var/fluxd/keygen",
             "--git-url=${data.github_repository.flux.ssh_clone_url}",
             "--git-branch=master",
-            "--git-poll-interval=120s",
+            "--git-poll-interval=15s",
             "--git-path=cluster-config",
+            "--sync-timeout=10m",
           ]
         }
       }

@@ -68,22 +68,28 @@ resource "azurerm_kubernetes_cluster" "demo" {
     vnet_subnet_id = var.azure_subnet_id
   }
 
-
-  service_principal {
-    client_id     = var.client_id
-    client_secret = var.client_secret
+  identity {
+    type = "SystemAssigned"
   }
+  # service_principal {
+  #   client_id     = var.client_id
+  #   client_secret = var.client_secret
+  # }
 
   role_based_access_control {
     enabled = true
     azure_active_directory {
-      client_app_id     = var.aad_client_app_id
-      server_app_id     = var.aad_server_app_id
-      server_app_secret = var.aad_server_app_secret
-      tenant_id         = var.aad_tenant_id
+      managed = true
+      # client_app_id     = var.aad_client_app_id
+      #server_app_id     = var.aad_server_app_id
+      #server_app_secret = var.aad_server_app_secret
+      #tenant_id         = var.aad_tenant_id
     }
   }
   addon_profile {
+    kube_dashboard {
+      enabled = false
+    }
     oms_agent {
       enabled                    = true
       log_analytics_workspace_id = azurerm_log_analytics_workspace.demo.id

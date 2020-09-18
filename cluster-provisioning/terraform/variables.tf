@@ -7,38 +7,38 @@ variable "resource_group" {
 }
 
 variable "location" {
-  default     = "East US"
+  default     = "southeastasia"
   description = "The Azure Region in which all resources will be provisioned in"
 }
 
 variable "kubernetes_version" {
-  default     = "1.15.10"
+  default     = "1.16.10"
   description = "The version of Kubernetes you want deployed to your cluster. Please reference the command: az aks get-versions --location eastus -o table"
 }
 
-variable "client_id" {
-  description = "The Client ID for the Service Principal to use for this Managed Kubernetes Cluster"
-}
+# variable "client_id" {
+#   description = "The Client ID for the Service Principal to use for this Managed Kubernetes Cluster"
+# }
 
-variable "client_secret" {
-  description = "The Client Secret for the Service Principal to use for this Managed Kubernetes Cluster"
-}
+# variable "client_secret" {
+#   description = "The Client Secret for the Service Principal to use for this Managed Kubernetes Cluster"
+# }
 
-variable "aad_client_app_id" {
-  description = "AAD APP ID for AAD Integration"
-}
+# variable "aad_client_app_id" {
+#   description = "AAD APP ID for AAD Integration"
+# }
 
-variable "aad_server_app_id" {
-  description = "AAD Server ID for AAD Integration"
-}
+# variable "aad_server_app_id" {
+#   description = "AAD Server ID for AAD Integration"
+# }
 
-variable "aad_server_app_secret" {
-  description = "AAD Server App Secret for AAD Integration"
-}
+# variable "aad_server_app_secret" {
+#   description = "AAD Server App Secret for AAD Integration"
+# }
 
-variable "aad_tenant_id" {
-  description = "AAD Tenant ID for AAD Integration"
-}
+# variable "aad_tenant_id" {
+#   description = "AAD Tenant ID for AAD Integration"
+# }
 
 variable "public_ssh_key_path" {
   description = "The Path at which your Public SSH Key is located. Defaults to ~/.ssh/id_rsa.pub"
