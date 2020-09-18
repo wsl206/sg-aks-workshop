@@ -126,6 +126,7 @@ az network firewall network-rule create -g $RG -f $FWNAME --collection-name 'aks
 az network firewall network-rule create -g $RG -f $FWNAME --collection-name 'aksfwnr' -n 'apitcp' --protocols 'TCP' --source-addresses '*' --destination-addresses "AzureCloud.$LOC" --destination-ports 9000
 az network firewall network-rule create -g $RG -f $FWNAME --collection-name 'aksfwnr' -n 'time' --protocols 'UDP' --source-addresses '*' --destination-fqdns 'ntp.ubuntu.com' --destination-ports 123
 
+az network firewall network-rule create -g $RG -f $FWNAME --collection-name 'aksfwnr2' -n 'dns' --protocols 'UDP' --source-addresses '*' --destination-addresses '*' --destination-ports 53 --action allow --priority 200
 az network firewall network-rule create -g $RG -f $FWNAME --collection-name 'aksfwnr3' -n 'gitssh' --protocols 'TCP' --source-addresses '*' --destination-addresses '*' --destination-ports 22 --action allow --priority 300
 az network firewall network-rule create -g $RG -f $FWNAME --collection-name 'aksfwnr4' -n 'fileshare' --protocols 'TCP' --source-addresses '*' --destination-addresses '*' --destination-ports 445 --action allow --priority 400
 
@@ -143,7 +144,7 @@ az network firewall application-rule create -g $RG -f $FWNAME \
  -n 'required' \
  --source-addresses '*' \
  --protocols 'http=80' 'https=443' \
- --target-fqdns '*auth.docker.io' '*cloudflare.docker.io' '*cloudflare.docker.com' '*registry-1.docker.io' 'apt.dockerproject.org' 'gcr.io' 'storage.googleapis.com' '*.quay.io' 'quay.io' '*.cloudfront.net' '*.azurecr.io' '*.gk.azmk8s.io' 'raw.githubusercontent.com' 'gov-prod-policy-data.trafficmanager.net' 'api.snapcraft.io' '*.github.com' '*.vault.azure.net' '*.azds.io'
+ --target-fqdns 'aksrepos.azurecr.io' '*blob.core.windows.net' 'mcr.microsoft.com' '*cdn.mscr.io' 'management.azure.com' 'login.microsoftonline.com' 'ntp.ubuntu.com' 'packages.microsoft.com' 'acs-mirror.azureedge.net' '*.hcp.eastus.azmk8s.io' '*.tun.eastus.azmk8s.io' 'security.ubuntu.com' '*archive.ubuntu.com' 'changelogs.ubuntu.com' 'nvidia.github.io' 'us.download.nvidia.com' 'apt.dockerproject.org' 'dc.services.visualstudio.com' '*.ods.opinsights.azure.com' '*.oms.opinsights.azure.com'  '*.microsoftonline.com' '*.monitoring.azure.com' '*auth.docker.io' '*cloudflare.docker.io' '*cloudflare.docker.com' '*registry-1.docker.io' 'apt.dockerproject.org' 'gcr.io' 'storage.googleapis.com' '*.quay.io' 'quay.io' '*.cloudfront.net' '*.azurecr.io' '*.gk.azmk8s.io' 'raw.githubusercontent.com' 'gov-prod-policy-data.trafficmanager.net' 'api.snapcraft.io' '*.github.com' '*.vault.azure.net' '*.azds.io'
 
 # Associate AKS Subnet to FW
 az network vnet subnet update -g $RG --vnet-name $VNET_NAME --name $AKSSUBNET_NAME --route-table $FWROUTE_TABLE_NAME

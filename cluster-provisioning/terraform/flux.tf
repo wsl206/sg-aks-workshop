@@ -130,7 +130,7 @@ resource "kubernetes_deployment" "flux" {
 
         container {
           name  = "flux"
-          image = "docker.io/fluxcd/flux-prerelease:master-1f0f862b"
+          image = "docker.io/fluxcd/flux:1.20.2"
 
           volume_mount {
             name       = "git-key"
