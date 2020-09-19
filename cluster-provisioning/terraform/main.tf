@@ -113,3 +113,15 @@ resource "azurerm_kubernetes_cluster" "demo" {
         ]
     }
 }
+
+data "azurerm_virtual_network" "vnet" {
+  name                = var.azure_vnet_name
+  resource_group_name = var.resource_group
+}
+
+resource "azurerm_role_assignment" "demo" {
+  depends_on = [azurerm_kubernetes_cluster.demo]
+  scope                = data.azurerm_virtual_network.vnet.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_kubernetes_cluster.demo.identity[0].principal_id
+}
