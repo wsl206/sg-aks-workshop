@@ -6,9 +6,9 @@ This section walks us through steps that need to get performed after the cluster
 
 This is a quick test to make sure that Pods can be created and the Ingress Controller default backend is setup correctly.
 
-* First we need to grab AKS cluster credentials so we can access the api-server endpoint and run some commands.
-* Second we will do a quick check via get nodes.
-* Lastly, we will spin up a Pod, exec into it, and test our F/W rules.
+- First we need to grab AKS cluster credentials so we can access the api-server endpoint and run some commands.
+- Second we will do a quick check via get nodes.
+- Lastly, we will spin up a Pod, exec into it, and test our F/W rules.
 
 ```bash
 # List out AKS Cluster(s) in a Table
@@ -57,7 +57,7 @@ Ok, you get it, or you don't buy into selectively capturing data. Your organizat
 
 So how do I capture those Kubernetes audit logs and where should they be put? Directing the logs to Azure Monitor for Containers gets really expensive, really fast, due to the sheer volume of data records that are captured. Considering that most organizations are not 100% sure if they need the logs or not, and to keep costs to a minimum, the guidance is to direct the audit logs to Azure Storage.
 
-* Click [Enable Kubernetes Logs](https://docs.microsoft.com/en-us/azure/aks/view-master-logs) for more details and direct **kube-audit** logs to an Azure Storage Account, **NOT Log Analytics**.
+- Click [Enable Kubernetes Logs](https://docs.microsoft.com/en-us/azure/aks/view-master-logs) for more details and direct **kube-audit** logs to an Azure Storage Account, **NOT Log Analytics**.
 
 ## Setup ACR Permissions
 
@@ -65,7 +65,7 @@ This section sets up the connection between AKS and Azure Container Registry (AC
 
 ```bash
 # Update Azure Container Registries (ACR) in a Table
-az aks update -n $NAME-aks -g $RG --attach-acr $ACR_NAME    
+az aks update -n $NAME-aks -g $RG --attach-acr $ACR_NAME
 ```
 
 ## Setup Cluster Metrics
@@ -74,6 +74,7 @@ This section enables capture of metrics for the AKS cluster to be able to create
 
 ```bash
 # Add Metrics
+APPID=$(az aks show -g $RG -n $PREFIX-aks --query 'identity.principalId' -o tsv)
 az aks show -g $RG -n $PREFIX-aks --query 'id' -o tsv
 az role assignment create --assignee $APPID --scope $(az aks show -g $RG -n $PREFIX-aks --query 'id' -o tsv) --role "Monitoring Metrics Publisher"
 # Add Log Analytics Reader
@@ -104,11 +105,11 @@ az network public-ip show -g $RG -n $AGPUBLICIP_NAME --query "ipAddress" -o tsv
 
 In this section we will setup the AKS specific policies we want to enforce. To recap, for our given scenario that means:
 
-* Registry Whitelisting
+- Registry Whitelisting
 
 ```bash
 # Create Allowed Repos Constraint Template
-kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/master/library/general/allowedrepos/template.yaml
+kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper-library/master/library/general/allowedrepos/template.yaml
 
 # Install Constraint Based on Constraint Template
 cat <<EOF | kubectl apply -f -
@@ -159,11 +160,11 @@ To enable the NSG flow logs and Traffic Analytics, please follow this online Tut
 
 **Here is a list of some of the key items that can be monitored for with Traffic Analytics:**
 
-* View Ports and VMs Receiving Traffic from the Internet
-* Find Traffic Hot Spots
-* Visualize Traffic Distribution by Geography
-* Visualize Traffic Distribution by Virtual Networks
-* Visualize Trends in NSG Rule Hits
+- View Ports and VMs Receiving Traffic from the Internet
+- Find Traffic Hot Spots
+- Visualize Traffic Distribution by Geography
+- Visualize Traffic Distribution by Virtual Networks
+- Visualize Trends in NSG Rule Hits
 
 For more details on usage scenarios click [here](https://docs.microsoft.com/en-us/azure/network-watcher/traffic-analytics#usage-scenarios).
 
@@ -173,6 +174,6 @@ For more details on usage scenarios click [here](https://docs.microsoft.com/en-u
 
 ## Key Links
 
-* [Patch Management with Kured](https://docs.microsoft.com/en-us/azure/aks/node-updates-kured)
-* [Azure Traffic Analytics](https://docs.microsoft.com/en-us/azure/network-watcher/traffic-analytics)
-* [Enable Kubernetes Logs](https://docs.microsoft.com/en-us/azure/aks/view-master-logs)
+- [Patch Management with Kured](https://docs.microsoft.com/en-us/azure/aks/node-updates-kured)
+- [Azure Traffic Analytics](https://docs.microsoft.com/en-us/azure/network-watcher/traffic-analytics)
+- [Enable Kubernetes Logs](https://docs.microsoft.com/en-us/azure/aks/view-master-logs)

@@ -47,20 +47,20 @@ You now can open your browser and point to <http://127.0.0.1:9090> to open the K
 
 KubeCost will break down resources into the following categories:
 
-* Monthly Cluster Cost
-* Namespace Cost
-* Deployment Resource Cost
-* Cost Efficiency
+- Monthly Cluster Cost
+- Namespace Cost
+- Deployment Resource Cost
+- Cost Efficiency
 
 You'll see a dashboard like the one below when selecting your cluster
 
 ![kubecost-admin](img/cost-admin.png)
 
-If you select __Allocation__ on the left side you can dig down into the namespace cost of your resources. It will show the cost for CPU, Memory, Persistent Volumes, and Network. It gets the data from Azure pricing, but you can also set a custom cost of the resources.
+If you select **Allocation** on the left side you can dig down into the namespace cost of your resources. It will show the cost for CPU, Memory, Persistent Volumes, and Network. It gets the data from Azure pricing, but you can also set a custom cost of the resources.
 
 ![kubecost-allocation](img/allocation.png)
 
-Now if you select  __Savings__ on the left side you can dig down into cost-saving for underutilized resources. It will give you info back on underutilized nodes, pods, and abandoned resources. It will also identify resource requests that have been overprovisioned within the cluster. You can see a sample below of the overview:
+Now if you select **Savings** on the left side you can dig down into cost-saving for underutilized resources. It will give you info back on underutilized nodes, pods, and abandoned resources. It will also identify resource requests that have been overprovisioned within the cluster. You can see a sample below of the overview:
 
 ![kubecost-savings](img/savings.png)
 
@@ -72,4 +72,4 @@ Take some time to navigate around the different views and features KubeCost prov
 
 ## Key Links
 
-* [KubeCost](https://kubecost.com/)
+- [KubeCost](https://kubecost.com/)
