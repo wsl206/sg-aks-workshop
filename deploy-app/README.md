@@ -60,22 +60,21 @@ docker push ${PREFIX}acr.azurecr.io/imageclassifierworker:v1
 
 One of the most important things an organization can do when adopting Containers is good image management hygiene. This means that images should be scanned prior to being deployed to a cluster. **The old saying goes, "Garbage In, Garbage Out", meaning if you deploy unsecured images to the container registry then the cluster will be deploying unsecured and potentially dangerous images.**
 
-* It is critical to scan images for vulnerabilities in your environment. We recommending using a Enterprise-grade tool such as [Aqua Security](https://www.aquasec.com/products/aqua-container-security-platform) or [Twistlock](https://www.twistlock.com/why-twistlock) or [SysDig Secure](https://sysdig.com/products/secure/).
+- It is critical to scan images for vulnerabilities in your environment. We recommending using a Enterprise-grade tool such as [Aqua Security](https://www.aquasec.com/products/aqua-container-security-platform) or [Twistlock](https://www.twistlock.com/why-twistlock) or [SysDig Secure](https://sysdig.com/products/secure/).
 
-* These tools should be integrated into the CI/CD pipeline, Container Registry, and container runtimes to provide end-to-end protection. Review full guidance here: [https://docs.microsoft.com/en-us/azure/aks/operator-best-practices-container-image-management](https://docs.microsoft.com/en-us/azure/aks/operator-best-practices-container-image-management)
+- These tools should be integrated into the CI/CD pipeline, Container Registry, and container runtimes to provide end-to-end protection. Review full guidance here: [https://docs.microsoft.com/en-us/azure/aks/operator-best-practices-container-image-management](https://docs.microsoft.com/en-us/azure/aks/operator-best-practices-container-image-management)
 
-* For the purposes of this workshop we will be using Anchore for some quick testing. [https://anchore.com/opensource](https://anchore.com/opensource)
+- For the purposes of this workshop we will be using Anchore for some quick testing. [https://anchore.com/opensource](https://anchore.com/opensource)
 
-* Install **Anchore** with Helm.
+- Install **Anchore** with Helm.
 
 ```bash
 # Check Helm Client Version (Assumes >= v3.0.0)
 helm version
 # Install Anchore
 kubectl create namespace anchore
-helm repo add stable https://kubernetes-charts.storage.googleapis.com
-helm repo update
-helm install anchore stable/anchore-engine --namespace anchore
+helm repo add anchore https://charts.anchore.io
+helm install anchore -f anchore_values.yaml anchore/anchore-engine
 # Check Status
 helm status anchore --namespace anchore
 helm list --namespace anchore
@@ -85,7 +84,7 @@ kubectl get po -n anchore
 
 > Note: It may take a few minutes for all of the pods to start and for the CVE data to be loaded into the database.
 
-* Exec into the analyzer pod to access the CLI
+- Exec into the analyzer pod to access the CLI
 
 ```bash
 # Once all of the Pods are Running and the CVE Data is Loaded
@@ -97,14 +96,15 @@ anchore-demo-anchore-engine-analyzer-974d7479d-7nkgp   1/1     Running   0      
 
 ```bash
 # Before Exec'ing into Pod, Grab these Variables (Needed Later)
-echo APPID=$APPID
-echo PASSWORD=$PASSWORD
 echo ACR_NAME=${PREFIX}acr.azurecr.io
+echo ACR_USERNAME=$(az acr credential show -n $ACR_NAME --query 'username' -o tsv)
+echo ACR_PASSWORD=$(az acr credential show -n $ACR_NAME --query 'passwords[0].value' -o tsv)
+
 # Now Exec into Pod
 kubectl exec -it $(kubectl get po -l app=anchore-anchore-engine -l component=analyzer -n anchore -o jsonpath='{.items[0].metadata.name}') -n anchore bash
 ```
 
-* Set env variables to configure CLI (while exec'd into pod)
+- Set env variables to configure CLI (while exec'd into pod)
 
 ```bash
 ANCHORE_CLI_USER=admin
@@ -112,7 +112,7 @@ ANCHORE_CLI_PASS=foobar
 ANCHORE_CLI_URL=http://anchore-anchore-engine-api.anchore.svc.cluster.local:8228/v1/
 ```
 
-* Check status (while exec'd into pod)
+- Check status (while exec'd into pod)
 
 ```bash
 # Execute Status Command
@@ -128,15 +128,15 @@ Engine DB Version: 0.0.12
 Engine Code Version: 0.6.0
 ```
 
-* Connect Anchore to ACR (you will need to set these variables since they are not in the container profile)
+- Connect Anchore to ACR (you will need to set these variables since they are not in the container profile)
 
 ```bash
 # Grab Echoed Variables from Above
-APPID=...
-PASSWORD=...
 ACR_NAME=...
+ACR_USERNAME=...
+ACR_PASSWORD=...
 # Add ACR to Anchore Registry List
-anchore-cli registry add --registry-type docker_v2 $ACR_NAME $APPID $PASSWORD
+anchore-cli registry add --registry-type docker_v2 $ACR_NAME $ACR_USERNAME $ACR_PASSWORD
 # Sample Output
 Registry: youracr.azurecr.io
 User: 59343209-9d9e-464d-8508-068a3d331fb9
@@ -146,7 +146,7 @@ Created: 2019-11-11T17:56:05Z
 Updated: 2019-11-11T17:56:05Z
 ```
 
-* Add our images and check for issues
+- Add our images and check for issues
 
 ```bash
 # Add Images to Scan List
@@ -154,7 +154,7 @@ anchore-cli image add $ACR_NAME/imageclassifierweb:v1
 anchore-cli image add $ACR_NAME/imageclassifierworker:v1
 ```
 
-* Wait for Images to be "Analyzed" (Last Column Status). This will take a few mins so be patient.
+- Wait for Images to be "Analyzed" (Last Column Status). This will take a few mins so be patient.
 
 ```bash
 # Wait for all images to be "analyzed"
@@ -169,7 +169,7 @@ anchore-cli image content $ACR_NAME/imageclassifierweb:v1 os
 anchore-cli image content $ACR_NAME/imageclassifierworker:v1 os
 ```
 
-* Add the repositories to the watch list so that each time a new image is added it will be automatically scanned.
+- Add the repositories to the watch list so that each time a new image is added it will be automatically scanned.
 
 ```bash
 # Add Repositories to Watch List
@@ -189,7 +189,7 @@ anchore-cli subscription activate vuln_update $ACR_NAME/imageclassifierworker:v1
 anchore-cli subscription list
 ```
 
-* Take a look at the policies that Anchore puts into place by default and see if the images pass the policy.
+- Take a look at the policies that Anchore puts into place by default and see if the images pass the policy.
 
 ```bash
 # Working with Policies
@@ -212,7 +212,7 @@ Policy ID: 2c53a13c-1765-11e8-82ef-23527761d060
 exit
 ```
 
-* Explore Anchore API via UI
+- Explore Anchore API via UI
 
 ```bash
 # Test out Anchore API to get a Feel for Automation (Requires New Command Line)
@@ -235,15 +235,16 @@ kubectl get deploy,rs,po,svc,ingress -n dev
 
 ### File Share Setup
 
-You will notice that some of the pods are not starting up, this is because an Azure File Share is missing and the secret to access Azure Files. 
+You will notice that some of the pods are not starting up, this is because an Azure File Share is missing and the secret to access Azure Files.
 
-Create an Azure Storage account in your resource group. 
+Create an Azure Storage account in your resource group.
+
 ```bash
 # declare the share referenced above.
 SHARE_NAME=fruit
 
 # az storage creation for app.
-STORAGE_ACCOUNT=${PREFIX}storage 
+STORAGE_ACCOUNT=${PREFIX}storage
 
 # create storage account
 az storage account create -g $RG -n $STORAGE_ACCOUNT
@@ -287,7 +288,7 @@ curl -sSk 100.64.2.4 | grep -i 'TensorFlow'
 exit
 ```
 
-* Now Test with the WAF Ingress Point
+- Now Test with the WAF Ingress Point
 
 ```bash
 az network public-ip show -g $RG -n $AGPUBLICIP_NAME --query "ipAddress" -o tsv
@@ -299,9 +300,9 @@ This section will take a look at the same application, but add in some more capa
 
 Here is a small list of things that will be added:
 
-* Health Checks via Liveness and Readiness Probes.
-* Application Instrumentation with Instrumentation Key securely stored in Azure Key Vault (AKV).
-* Add a Title to the App with that Title stored in AKV for illustration purposes only.
+- Health Checks via Liveness and Readiness Probes.
+- Application Instrumentation with Instrumentation Key securely stored in Azure Key Vault (AKV).
+- Add a Title to the App with that Title stored in AKV for illustration purposes only.
 
 When dealing with secrets we typically need to store some type of bootstrapping credential(s) or connection string to be able to access the secure store.
 
@@ -313,7 +314,7 @@ There is, it is called AAD Pod Identity, or Managed Pod Identity. We are going t
 
 ### Create Azure Key Vault (AKV) & Secrets
 
-* In this section we will create the secrets backing store which will be Azure Key Vault and populate it with the secrets information.
+- In this section we will create the secrets backing store which will be Azure Key Vault and populate it with the secrets information.
 
 ```bash
 # Create Azure Key Vault Instance
@@ -334,7 +335,7 @@ az keyvault secret show --name "AppInsightsInstrumentationKey" --vault-name ${PR
 
 ### Create Azure AD Identity
 
-* Now that we have AKV and the secrets setup, we need to create the Azure AD Identity and permissions to AKV.
+- Now that we have AKV and the secrets setup, we need to create the Azure AD Identity and permissions to AKV.
 
 ```bash
 # Create Azure AD Identity
@@ -366,13 +367,14 @@ az role assignment create \
     --assignee $AAD_IDENTITY_PRINCIPALID \
     --scope /subscriptions/$SUBID/resourcegroups/$RG
 # Grant AAD Identity access permissions to AKS Cluster SP
+KUBELET_ID=$(az aks show -g $RG -n $PREFIX-aks --query identityProfile.kubeletidentity.clientId -o tsv)
 az role assignment create \
     --role "Managed Identity Operator" \
-    --assignee $APPID \
+    --assignee $KUBELET_ID \
     --scope /subscriptions/$SUBID/resourcegroups/$RG/providers/Microsoft.ManagedIdentity/UserAssignedIdentities/$AAD_IDENTITY
 ```
 
-* Now that we have the Azure AD Identity setup, the next step is to set up the access policy (RBAC) in AKV to allow or deny certain permissions to the data.
+- Now that we have the Azure AD Identity setup, the next step is to set up the access policy (RBAC) in AKV to allow or deny certain permissions to the data.
 
 ```bash
 # Setup Access Policy (Permissions) in AKV
@@ -384,7 +386,7 @@ az keyvault set-policy \
 
 ### Create Azure AD Identity Resources in AKS
 
-* Now that we have all the Azure AD Identity and AKS Cluster SP permissions setup. The next step is to setup and configure the AAD Pod Identities in AKS.
+- Now that we have all the Azure AD Identity and AKS Cluster SP permissions setup. The next step is to setup and configure the AAD Pod Identities in AKS.
 
 ```bash
 # Create AAD Identity
@@ -418,14 +420,14 @@ kubectl get azureidentity,azureidentitybinding -n dev
 
 ### Deploy Updated Version of Application which accesses AKV
 
-* Now that the bindings are set up, we are ready to test it out by deploying our application and see if it is able to read everything it needs from AKV.
+- Now that the bindings are set up, we are ready to test it out by deploying our application and see if it is able to read everything it needs from AKV.
 
 **NOTE: It is the following label, configured via above, that determines whether or not the Identity Controller tries to assign an AzureIdentity to a specific Pod.**
 
 metadata:
-  labels:
-    **aadpodidbinding: bind-akv-identity**
-  name: my-pod
+labels:
+**aadpodidbinding: bind-akv-identity**
+name: my-pod
 
 ```bash
 # Remove Existing Application
@@ -456,7 +458,7 @@ kubectl get AzureAssignedIdentities -n dev
 kubectl get deploy,rs,po,svc,ingress,secrets -n dev
 ```
 
-* Once the pods are up and running, check via the WAF Ingress Point
+- Once the pods are up and running, check via the WAF Ingress Point
 
 ```bash
 # Get Public IP Address of Azure App Gateway
@@ -469,6 +471,6 @@ az network public-ip show -g $RG -n $AGPUBLICIP_NAME --query "ipAddress" -o tsv
 
 ## Key Links
 
-* [Tilt](https://github.com/windmilleng/tilt)
-* [Telepresence](https://telepresence.io)
-* [Azure Dev Spaces](https://docs.microsoft.com/en-us/azure/dev-spaces/about)
+- [Tilt](https://github.com/windmilleng/tilt)
+- [Telepresence](https://telepresence.io)
+- [Azure Dev Spaces](https://docs.microsoft.com/en-us/azure/dev-spaces/about)

@@ -20,7 +20,7 @@ resource "azurerm_container_registry" "acr" {
   resource_group_name = var.resource_group
   location            = var.location
   sku                 = "Standard"
-  admin_enabled       = false
+  admin_enabled       = true
 }
 
 resource "azurerm_log_analytics_workspace" "demo" {
@@ -107,7 +107,7 @@ resource "azurerm_kubernetes_cluster" "demo" {
 
   lifecycle {
         ignore_changes = [
-            default_node_pool[0].node_count,
+            # default_node_pool[0].node_count,
             default_node_pool[0].vnet_subnet_id,
             windows_profile
         ]
