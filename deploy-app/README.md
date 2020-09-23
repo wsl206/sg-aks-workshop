@@ -233,7 +233,7 @@ kubectl apply -f app.yaml
 kubectl get deploy,rs,po,svc,ingress -n dev
 ```
 
-### File Share Setup
+### File Share Setup (If you want to use an existing fileshare, Ask Hieu)
 
 You will notice that some of the pods are not starting up, this is because an Azure File Share is missing and the secret to access Azure Files.
 
@@ -366,12 +366,36 @@ az role assignment create \
     --role Reader \
     --assignee $AAD_IDENTITY_PRINCIPALID \
     --scope /subscriptions/$SUBID/resourcegroups/$RG
-# Grant AAD Identity access permissions to AKS Cluster SP
+# Grant AAD Identity access permissions to AKS Cluster Kubelet MSI
 KUBELET_ID=$(az aks show -g $RG -n $PREFIX-aks --query identityProfile.kubeletidentity.clientId -o tsv)
+MCRG_ID=$(az group show --name $(az aks show -g $RG -n $PREFIX-aks --query nodeResourceGroup -o tsv) --query id -o tsv)
+AKSSUBNET_ID=$(az network vnet subnet show \
+    --resource-group $RG \
+    --vnet-name $VNET_NAME \
+    --name $AKSSUBNET_NAME --query id -o tsv)
+
 az role assignment create \
     --role "Managed Identity Operator" \
     --assignee $KUBELET_ID \
     --scope /subscriptions/$SUBID/resourcegroups/$RG/providers/Microsoft.ManagedIdentity/UserAssignedIdentities/$AAD_IDENTITY
+
+    az role assignment create \
+    --role "Managed Identity Operator" \
+    --assignee $KUBELET_ID \
+    --scope $MCRG_ID
+
+    az role assignment create \
+    --role "Virtual Machine Contributor" \
+    --assignee $KUBELET_ID \
+    --scope $MCRG_ID
+
+    az role assignment create \
+    --role "Network Contributor" \
+    --assignee $KUBELET_ID \
+    --scope $AKSSUBNET_ID
+
+
+az role assignment list --assignee $KUBELET_ID --all -o table
 ```
 
 - Now that we have the Azure AD Identity setup, the next step is to set up the access policy (RBAC) in AKV to allow or deny certain permissions to the data.
@@ -413,6 +437,17 @@ metadata:
 spec:
   AzureIdentity: akv-identity
   Selector: bind-akv-identity
+EOF
+
+cat <<EOF | kubectl apply -f -
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzurePodIdentityException
+metadata:
+  name: mic-exception
+  namespace: aadpodidentity
+spec:
+  PodLabels:
+    app: mic
 EOF
 # Take a look at AAD Resources
 kubectl get azureidentity,azureidentitybinding -n dev
