@@ -233,7 +233,7 @@ kubectl apply -f app.yaml
 kubectl get deploy,rs,po,svc,ingress -n dev
 ```
 
-### File Share Setup
+### File Share Setup (If you want to use an existing fileshare, Ask Hieu)
 
 You will notice that some of the pods are not starting up, this is because an Azure File Share is missing and the secret to access Azure Files.
 
